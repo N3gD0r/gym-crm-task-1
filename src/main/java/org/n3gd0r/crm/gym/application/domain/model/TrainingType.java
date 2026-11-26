@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.Objects;
 
+// TODO: Instead of entity class an ENUM may suffice?
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,7 +25,7 @@ public class TrainingType {
         return Objects.hash(id, type);
     }
 
-    enum Type {
+    public enum Type {
         FITNESS,
         YOGA,
         RESISTANCE,

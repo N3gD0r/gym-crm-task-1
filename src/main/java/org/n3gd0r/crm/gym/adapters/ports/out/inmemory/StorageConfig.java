@@ -32,4 +32,14 @@ public class StorageConfig {
     File traineeFile(@Value("${storage.trainee}") String path) {
         return new File(path);
     }
+
+    @Bean("TrainerDataFile")
+    File trainerFile(@Value("${storage.trainer}") String path) {
+        return new File(path);
+    }
+
+    @Bean("TrainingDataFile")
+    File trainingFile(@Value("${storage.training}") String path) {
+        return new File(path);
+    }
 }
