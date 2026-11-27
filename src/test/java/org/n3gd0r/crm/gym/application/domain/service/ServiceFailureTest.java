@@ -8,6 +8,7 @@ import org.n3gd0r.crm.gym.application.domain.model.TrainingType;
 import org.n3gd0r.crm.gym.application.mapper.TrainingMapper;
 import org.n3gd0r.crm.gym.application.ports.in.command.trainee.DeleteTraineeCommand;
 import org.n3gd0r.crm.gym.application.ports.in.command.training.CreateTrainingCommand;
+import org.n3gd0r.crm.gym.application.ports.in.usecase.user.UserCredentialGenerator;
 import org.n3gd0r.crm.gym.application.ports.out.trainee.TraineeRepository;
 import org.n3gd0r.crm.gym.application.ports.out.trainer.TrainerRepository;
 import org.n3gd0r.crm.gym.application.ports.out.training.TrainingRepository;
@@ -22,7 +23,8 @@ class ServiceFailureTest {
     void deletingAMissingTraineeDoesNotDeleteAnyTrainings() {
         var trainees = mock(TraineeRepository.class);
         var trainings = mock(TrainingRepository.class);
-        var service = new TraineeService(trainees, trainings, new Object());
+        var credsGen = mock(UserCredentialGenerator.class);
+        var service = new TraineeService(trainees, trainings, new Object(), credsGen);
         when(trainees.getEntity(42L)).thenThrow(new TraineeNotFoundException(42L));
 
         assertThatThrownBy(() -> service.removeTrainee(new DeleteTraineeCommand(42L)))

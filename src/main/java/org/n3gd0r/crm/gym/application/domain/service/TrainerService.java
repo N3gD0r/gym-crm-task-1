@@ -19,36 +19,35 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TrainerService implements TrainerUseCase {
     private final TrainerRepository repository;
+    private final Object writeLock;
     private final UserCredentialGenerator credentialGenerator;
-    @Setter(onMethod_ = {@Autowired})
+    @Setter(onMethod_ = @Autowired)
     private TrainerMapper mapper;
 
     @Override
     public Trainer addTrainer(CreateTrainerCommand command) {
-        log.debug("CREATE Trainer Profile: Saving new trainer");
-        String username = credentialGenerator.username(command.firstname(), command.lastname());
-        log.debug("CREATE Trainer Profile: Generated username");
-        String password = credentialGenerator.password();
-        log.debug("CREATE Trainer Profile: Generated password");
-        Trainer trainer = mapper.toTrainer(command, username, password);
-        repository.persist(trainer);
-        log.debug("CREATE Trainer Profile: completed");
-        return trainer;
+        synchronized (writeLock) {
+            String username = credentialGenerator.username(command.firstname(), command.lastname());
+            Trainer trainer = mapper.toTrainer(command, username, credentialGenerator.password());
+            repository.persist(trainer);
+            log.info("Created trainer profile with ID {}", trainer.getUserId());
+            return trainer;
+        }
     }
 
     @Override
     public Trainer getTrainer(GetTrainerQuery query) {
+        log.debug("Selecting trainer profile with ID {}", query.trainerId());
         return repository.getEntity(query.trainerId());
     }
 
     @Override
     public void updateTrainer(UpdateTrainerCommand command) {
-        log.debug("UPDATE Trainer: Checking if trainer exists with ID {}", command.trainerId());
-        Trainer trainer = repository.getEntity(command.trainerId());
-        log.debug("UPDATE Trainer: found");
-        mapper.updateTrainer(command, trainer);
-        log.debug("UPDATE Trainer: Updating Trainer in place");
-        repository.persist(trainer);
-        log.debug("UPDATE Trainer: updated");
+        synchronized (writeLock) {
+            Trainer trainer = repository.getEntity(command.trainerId());
+            mapper.updateTrainer(command, trainer);
+            repository.persist(trainer);
+        }
+        log.info("Updated trainer profile with ID {}", command.trainerId());
     }
 }
