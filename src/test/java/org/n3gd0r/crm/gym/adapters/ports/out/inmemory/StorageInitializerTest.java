@@ -23,12 +23,9 @@ class StorageInitializerTest {
         var trainees = new ConcurrentHashMap<Long, Trainee>();
         var trainers = new ConcurrentHashMap<Long, Trainer>();
         var trainings = new ConcurrentHashMap<Long, Training>();
-        var traineeDao = new TraineeDao();
-        traineeDao.setTable(trainees);
-        var trainerDao = new TrainerDao();
-        trainerDao.setTable(trainers);
-        var trainingDao = new TrainingDao();
-        trainingDao.setTable(trainings);
+        var traineeDao = new TraineeDao(trainees);
+        var trainerDao = new TrainerDao(trainers);
+        var trainingDao = new TrainingDao(trainings);
         var lookup = new UsernameLookupDao();
         lookup.setTraineeTable(trainees);
         lookup.setTrainerTable(trainers);
@@ -41,7 +38,7 @@ class StorageInitializerTest {
         initializer.setTraineePath(tempDir.resolve("missing.csv").toString());
         initializer.setTrainerPath("classpath:seed/trainers.csv");
         initializer.setTrainingPath(Files.writeString(tempDir.resolve("trainings.csv"), """
-
+                
                 1,201,42,Missing trainee,YOGA,45,2025-02-03
                 """).toUri().toString());
 

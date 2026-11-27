@@ -12,11 +12,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GymDaoTest {
-    private final TraineeDao dao = new TraineeDao();
+    private TraineeDao dao;
+
+    private static Trainee trainee(Long id) {
+        var trainee = new Trainee("Test", "Profile", null, null, true);
+        trainee.setUserId(id);
+        return trainee;
+    }
 
     @BeforeEach
     void setUp() {
-        dao.setTable(new ConcurrentHashMap<>());
+        dao = new TraineeDao(new ConcurrentHashMap<>());
     }
 
     @Test
@@ -42,11 +48,5 @@ class GymDaoTest {
         assertThatThrownBy(() -> dao.remove(trainee(null))).isInstanceOf(TraineeNotFoundException.class);
         assertThatThrownBy(() -> dao.remove(trainee(1L))).isInstanceOf(TraineeNotFoundException.class);
         assertThatThrownBy(() -> dao.getEntity(null)).isInstanceOf(TraineeNotFoundException.class);
-    }
-
-    private static Trainee trainee(Long id) {
-        var trainee = new Trainee("Test", "Profile", null, null, true);
-        trainee.setUserId(id);
-        return trainee;
     }
 }
