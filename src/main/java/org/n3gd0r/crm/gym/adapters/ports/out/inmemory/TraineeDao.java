@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.n3gd0r.crm.gym.application.domain.exception.TraineeNotFoundException;
 import org.n3gd0r.crm.gym.application.domain.model.Trainee;
 import org.n3gd0r.crm.gym.application.domain.model.User;
+import org.n3gd0r.crm.gym.application.ports.out.trainee.TraineeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ import java.util.Scanner;
 
 @Slf4j
 @Repository("InMemoryTraineeRepository")
-public class TraineeDao extends GymDao<Trainee> {
+public class TraineeDao extends GymDao<Trainee> implements TraineeRepository {
     @Setter(onMethod_ = {@Autowired, @Qualifier("TraineeDataFile")})
     private File traineeInitialData;
 
