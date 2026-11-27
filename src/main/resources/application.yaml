@@ -1,3 +1,6 @@
 spring:
   application:
     name: gym
+security:
+  password:
+    length: 10
