@@ -1,7 +1,9 @@
 package org.n3gd0r.crm.gym.adapters.ports.out.inmemory;
 
-import org.n3gd0r.crm.gym.application.domain.model.User;
+import org.n3gd0r.crm.gym.application.domain.model.Trainee;
+import org.n3gd0r.crm.gym.application.domain.model.Trainer;
 import org.n3gd0r.crm.gym.application.ports.out.user.UsernameLookupPort;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
@@ -9,15 +11,22 @@ import java.util.Map;
 
 @Repository
 public class UsernameLookupDao implements UsernameLookupPort {
-    private final Map<Long, User> userTable;
+    private Map<Long, Trainee> traineeTable;
+    private Map<Long, Trainer> trainerTable;
 
-    public UsernameLookupDao(@Qualifier("UserTable") Map<Long, User> userTable) {
-        this.userTable = userTable;
+    @Autowired
+    public void setTraineeTable(@Qualifier("TraineeTable") Map<Long, Trainee> traineeTable) {
+        this.traineeTable = traineeTable;
+    }
+
+    @Autowired
+    public void setTrainerTable(@Qualifier("TrainerTable") Map<Long, Trainer> trainerTable) {
+        this.trainerTable = trainerTable;
     }
 
     @Override
     public boolean existsByName(String username) {
-        return userTable.values().stream()
-                .anyMatch(u -> u.getUsername().equals(username));
+        return traineeTable.values().stream().anyMatch(user -> username.equals(user.getUsername()))
+                || trainerTable.values().stream().anyMatch(user -> username.equals(user.getUsername()));
     }
 }

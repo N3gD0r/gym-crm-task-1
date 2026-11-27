@@ -23,8 +23,7 @@ public class TraineeService implements TraineeUseCase {
     private final TraineeRepository repository;
     private final TrainingRepository trainingRepository;
     private final Object writeLock;
-    @Setter(onMethod_ = @Autowired)
-    private UserCredentialGenerator credentialGenerator;
+    private final UserCredentialGenerator credentialGenerator;
     @Setter(onMethod_ = @Autowired)
     private TraineeMapper mapper;
 

@@ -18,7 +18,7 @@ public abstract class GymDao<T> implements GymRepository<T, Long> {
     private final Function<Long, RuntimeException> notFound;
     private final AtomicLong lastId;
 
-    public GymDao(Map<Long, T> table, Class<T> type, Function<T, Long> readId, BiConsumer<T, Long> writeId, Function<Long, RuntimeException> notFound) {
+    protected GymDao(Map<Long, T> table, Class<T> type, Function<T, Long> readId, BiConsumer<T, Long> writeId, Function<Long, RuntimeException> notFound) {
         this.table = table;
         this.type = type;
         this.readId = readId;
@@ -33,18 +33,17 @@ public abstract class GymDao<T> implements GymRepository<T, Long> {
         validateEntity(entity);
         Long id = readId.apply(entity);
         if (id == null || table.remove(id) == null) {
-            log.error("Unable to remove a {} entity with ID {}: not found in persistence unit", type.getSimpleName(), id);
+            log.debug("{} with ID {} was not found for removal", type.getSimpleName(), id);
             throw notFound.apply(id);
         }
-        log.info("Removed a {} entity from persistence unit", type.getSimpleName());
-        log.debug("Removed a {} entity with ID {}", type.getSimpleName(), id);
+        log.debug("Removed {} with ID {}", type.getSimpleName(), id);
     }
 
     @Override
     public T getEntity(Long id) {
         T entity = id == null ? null : table.get(id);
         if (entity == null) {
-            log.error("{} with ID {} was not found in persistence unit", type.getSimpleName(), id);
+            log.debug("{} with ID {} was not found", type.getSimpleName(), id);
             throw notFound.apply(id);
         }
         return entity;
@@ -52,21 +51,30 @@ public abstract class GymDao<T> implements GymRepository<T, Long> {
 
     @Override
     public void persist(T entity) {
+        validateEntity(entity);
         Long id = readId.apply(entity);
         if (id == null) {
-            id = lastId.incrementAndGet();
+            id = lastId.updateAndGet(Math::incrementExact);
             writeId.accept(entity, id);
-            log.debug("{} entity ID is null, adding new ID {}", type.getSimpleName(), id);
         } else {
-            log.debug("Updating {} entity with ID {}", type.getSimpleName(), id);
+            lastId.accumulateAndGet(id, Math::max);
         }
         table.put(id, entity);
-        log.info("Saved a new {} entity with ID {}", type.getSimpleName(), id);
+        log.debug("Persisted {} with ID {}", type.getSimpleName(), id);
+    }
+
+    boolean insertSeed(T entity) {
+        Long id = readId.apply(entity);
+        if (table.putIfAbsent(id, entity) != null) {
+            return false;
+        }
+        lastId.accumulateAndGet(id, Math::max);
+        return true;
     }
 
     private void validateEntity(T entity) {
         if (entity == null) {
-            log.error("{} entity is null", type.getSimpleName());
+            log.debug("Null {} entity rejected", type.getSimpleName());
             throw new GymEntityNullException(type);
         }
     }
