@@ -1,0 +1,4 @@
+storage:
+  trainee: classpath:seed/trainees.csv
+  trainer: classpath:seed/trainers.csv
+  training: classpath:seed/trainings.csv
